@@ -7,7 +7,7 @@ if ( !defined('BASEPATH') ) exit('No direct script access allowed');
 class Snappy_concierge_ext
 {
 	public $name 			= 'Snappy Concierge';
-	public $version 		= '1.0';
+	public $version 		= '1.1';
 	public $description 	= 'Snappy Concierge makes it easy for agencies and consultancies to organize ongoing change and support requests across multiple clients.';
 	public $docs_url		= 'http://besnappy.com/concierge';
 	public $settings_exist	= 'y';
@@ -39,8 +39,26 @@ class Snappy_concierge_ext
 		// page as well. So, we need to make a check to make sure we
 		// haven't already placed the snappy code into the page.
 
-		if ( !empty($this->settings['sc_widget_code']) && !$this->page_has_snappy() ) {
-			ee()->cp->add_to_foot($this->settings['sc_widget_code']);
+		if ( !empty($this->settings['sc_widget_code']) && !$this->page_has_snappy() ) 
+		{
+			$snappy_widget_code = $this->settings['sc_widget_code'];
+
+			if ( empty($snappy_widget_code) ) {
+				return;
+			}
+
+			$email = ee()->session->userdata('email');
+			$screen_name = ee()->session->userdata('screen_name');
+
+			if ( !empty($screen_name) ) {
+				$snappy_widget_code = str_replace("<script", "<script data-name='$screen_name' ", $snappy_widget_code);
+			}
+
+			if ( !empty($email) ) {
+				$snappy_widget_code = str_replace("<script", "<script data-email='$email' ", $snappy_widget_code);
+			}
+
+			ee()->cp->add_to_foot($snappy_widget_code);
 		}
 	}
 
